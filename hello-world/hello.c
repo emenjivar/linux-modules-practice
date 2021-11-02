@@ -8,7 +8,7 @@ MODULE_DESCRIPTION("Simple hello world module");
 
 static int __init hello_init(void)
 {
-    printf(KERN_INFO "Hello world\n");
+    printk(KERN_INFO "Hello world\n");
     return 0;
 }
 
