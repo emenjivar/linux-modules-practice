@@ -27,21 +27,6 @@ hello.c  hello.ko  hello.mod  hello.mod.c  hello.mod.o  hello.o  Makefile  modul
 
 ## Useful commands
 ```bash
-# List modules that are already loaded in the kernel
-# Optionally, filter my loaded module
-$ lsmod | grep 'hello_module'
-```
-
-```bash
-# Insert a new module in the kernel (require root privileges)
-$ insmod hello_module.ko
-
-# Check kernel logs
-$ dmesg | grep -e 'Hello world'
-[ 4875.502744] Hello world
-```
-
-```bash
 # Display information about a kernel module
 # The module does not need to be mounted
 $ modinfo hello_module.ko
@@ -57,8 +42,22 @@ vermagic:       5.11.0-38-generic SMP mod_unload modversions
 ```
 
 ```bash
+# Insert a new module in the kernel (require root privileges)
+$ insmod hello_module.ko
+
+# Check kernel logs
+$ dmesg | grep -e 'Hello world'
+[ 4875.502744] Hello world
+```
+```bash
+# List modules that are already loaded in the kernel
+# Optionally, filter my loaded module
+$ lsmod | grep 'hello_module'
+```
+
+```bash
 # Remove a module from kernel (require root privileges)
-$ rmmod hello
+$ rmmod hello_module
 
 # Check kernel logs
 $ dmesg | grep -e 'Bye Hello world'
