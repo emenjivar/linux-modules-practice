@@ -20,7 +20,7 @@ $ dmesg | grep 'hello'
 ## Invalid input
 Array index out bound exception, the param **excluded_ports** supports only 5 elements
 ```bash
-$ insmod parameters.ko excluded_ports=3306,5432,1433,1350,3309
+$ insmod parameters.ko excluded_ports=3306,5432,1433,1350,3309,3312
 insmod: ERROR: could not insert module parameters.ko: Invalid parameters
 ```
 
