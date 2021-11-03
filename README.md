@@ -21,7 +21,7 @@ make[1]: Leaving directory '/usr/src/linux-headers-5.11.0-38-generic'
 This command will generate some files, the important here is **.ko**
 ```bash
 $ ls
-hello.c  hello.ko  hello.mod  hello.mod.c  hello.mod.o  hello.o  Makefile  modules.order  Module.symvers
+hello_module.c  hello_module.ko  hello_module.mod  hello_module.mod.c  hello_module.mod.o  hello_module.o  Makefile  modules.order  Module.symvers
 
 ```
 
