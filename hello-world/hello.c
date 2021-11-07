@@ -2,20 +2,22 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("carlos menjivar");
-MODULE_DESCRIPTION("Simple hello world module");
+#define TAG "hello-module"
 
 static int __init hello_init(void)
 {
-    printk(KERN_INFO "Hello world\n");
+    pr_info("%s Hello world\n", TAG);
     return 0;
 }
 
 static void __exit hello_exit(void)
 {
-    printk(KERN_INFO "Bye Hello world\n");
+    pr_info("%s Bye Hello world\n", TAG);
 }
 
 module_init(hello_init);
 module_exit(hello_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("carlos menjivar");
+MODULE_DESCRIPTION("Simple hello world module");
