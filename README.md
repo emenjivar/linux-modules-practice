@@ -1,5 +1,5 @@
 # Writting linux modules
-This repository follow this [book](https://tldp.org/LDP/lkmpg/2.6/html/index.html) and [blog](https://www.thegeekstuff.com/2013/07/write-linux-kernel-module/) about writting linux kernel modules from scratch.
+This repository follow this [guide](https://sysprog21.github.io/lkmpg/) and [blog](https://www.thegeekstuff.com/2013/07/write-linux-kernel-module/) about writting linux kernel modules from scratch.
 
 ## Requeriments
 ```bash
