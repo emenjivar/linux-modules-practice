@@ -10,6 +10,7 @@
 #include <linux/poll.h>
 #include <linux/random.h>
 #include <linux/string.h>
+#include "tracks.h"
 
 // Prototypes
 int init_module(void);
@@ -18,64 +19,14 @@ static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 static ssize_t device_read(struct file *, char *, size_t, loff_t *);
 static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
-// static char *get_mood(char *mood);
-
-static int get_mood_index(char *mood);
-static int get_random_track_index(void);
-static char **get_random_track(char *mood);
 
 #define SUCCESS 0
 #define DEVICE_NAME "my-device-module"
 #define BUF_LEN 80
-#define ROW 4
-#define COL 6
-
-#define SAD 0
-#define LONELY 1
-#define HAPPY 2
-#define WEIRD 3
 
 // Global variables are declared as static
 static int major_number;
 static char msg[BUF_LEN];
-static char *mood_matrix[ROW][COL][2] = {
-    // sad
-    {
-        {"Where is my love?", "Cat power"},
-        {"Space song", "Beach house"},
-        {"Come sweet death", "The end of evangelion"},
-        {"Jueves", "La oreja de van gogh"},
-        {"Alma mia", "Silvio rodriguez"},
-        {"Fireworks", "Stina nordenstam"}
-    },
-    // lonely
-    {
-        {"Don't give up", "Peter gabriel"},
-        {"Thank you for hearing me", "Sinead o'connor"},
-        {"Dimentions", "Her OST"},
-        {"The moon song", "Karen O"},
-        {"Asleep", "The smiths"},
-        {"Eclipse de luna en el cielo", "Natalia lafourcase"}
-    },
-    // happy
-    {
-        {"Over the rainbow", "Judy garland"},
-        {"Come on eileen", "Dexis midnight runners"},
-        {"Sea of love", "Cat power"},
-        {"I'll try anything one", "The strokes"},
-        {"Starry, starry night", "Don McLean"},
-        {"For lovers", "Lamp"}
-    },
-    // weird
-    {
-        {"Creep", "Radiohead"},
-        {"Weird fished", "Radiohead"},
-        {"13 angels standing guard 'round the side of your bed", "Silver Mt Zion"},
-        {"Little dark age", "MGMT"},
-        {"Pneumonia", "Bjork"},
-        {"Mercy street", "Peter gabriel"}
-    }
-};
 
 enum {
     CDEV_NOT_USED = 0,
@@ -218,66 +169,5 @@ static ssize_t device_write(
     return -EINVAL;
 }
 
-/*
-static char *get_mood(char *mood) {
-    int i, random, mood_index;
-    get_random_bytes(&i, sizeof(i));
-
-    random = i % 3; // Get a random number between 0 and 2
-    if(random < 0) {
-        random *= -1;
-    }
-
-    if(strcmp(mood, "sad") == 0) {
-        mood_index = 0;
-    } else if(strcmp(mood, "depressed") == 0) {
-        mood_index = 1;
-    } else {
-        mood_index = 0; // default mood sad
-    }
-
-    return mood_matrix[mood_index][random];
-}
-*/
-
-static int get_mood_index(char *mood) {
-    int index;
-    if(strcmp(mood, "sad") == 0) {
-        index = 0;
-    } else if(strcmp(mood, "lonely") == 0) {
-        index = 1;
-    } else if(strcmp(mood, "happy") == 0) {
-        index = 2;
-    } else if(strcmp(mood, "weird") == 0) {
-        index = 3;
-    } else {
-        index = 0;
-    }
-
-    return index;
-}
-
-static int get_random_track_index(void) {
-    int random_bytes, index;
-    get_random_bytes(&random_bytes, sizeof(random_bytes));
-
-    // Get a random number between 0 and 5
-    index = random_bytes % 6;
-
-    // Calculate absolute value of index
-    if(index < 0) {
-        index *= -1;
-    }
-
-    return index;
-}
-
-static char **get_random_track(char *mood) {
-    int local_mood_index, random_track_index;
-
-    local_mood_index = get_mood_index(mood);
-    random_track_index = get_random_track_index();
-    return mood_matrix[local_mood_index][random_track_index];
-}
-
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("carlos menjivar");
