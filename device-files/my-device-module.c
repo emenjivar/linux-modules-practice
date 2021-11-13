@@ -1,7 +1,13 @@
+#include <linux/cdev.h>
+#include <linux/delay.h>
+#include <linux/device.h>
+#include <linux/irq.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/fs.h>
 #include <asm/uaccess.h>
+#include <linux/poll.h>
 
 // Prototypes
 int init_module(void);
@@ -16,10 +22,22 @@ static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
 #define BUF_LEN 80
 
 // Global variables are declared as static
-static int Major;
-static int Device_Open = 0;
+static int major_number;
 static char msg[BUF_LEN];
-static char *msg_Ptr;
+
+enum {
+    CDEV_NOT_USED = 0,
+    CDEV_EXCLUSIVE_OPEN = 1
+};
+
+// Prevent multiple access to device driver
+static atomic_t already_open = ATOMIC_INIT(CDEV_NOT_USED);
+static struct class *cls;
+
+// Parameters
+static char *username = "anonymous";
+module_param(username, charp, 0000);
+MODULE_PARM_DESC(username, "Username - defaul value: anonymous");
 
 static struct file_operations fops = {
     .read = device_read,
@@ -30,34 +48,51 @@ static struct file_operations fops = {
 
 int init_module(void)
 {
-    Major = register_chrdev(0, DEVICE_NAME, &fops);
+    /**
+    * Adding the driver file to linux.
+    * 0 on the first parameter means that we are
+    * requesting the major number available on the SO
+    */
+    major_number = register_chrdev(0, DEVICE_NAME, &fops);
 
-    if(Major < 0) {
-        printk(KERN_ALERT "%s Registering char device failed with %d\n", DEVICE_NAME, Major);
-        return Major;
+    if(major_number < 0) {
+        pr_alert("%s Registering char device failed with %d\n", DEVICE_NAME, major_number);
+        return major_number;
     }
 
-    printk(KERN_INFO "%s I was assigned major number %d.\n", DEVICE_NAME, Major);
-    printk(KERN_INFO "%s Create the device using 'mknod /dev/%s c %d 0'\n", DEVICE_NAME, DEVICE_NAME, Major);
+    // Creating a pointer to use on device creation
+    cls = class_create(THIS_MODULE, DEVICE_NAME);
+
+    // Creating device automatically, no need to run mknod command
+    device_create(cls, NULL, MKDEV(major_number, 0), NULL, DEVICE_NAME);
+
+    pr_info("%s I was assigned major number %d.\n", DEVICE_NAME, major_number);
+    pr_info("%s Create the device using 'mknod /dev/%s c %d 0'\n", DEVICE_NAME, DEVICE_NAME, major_number);
     return SUCCESS;
 }
 
 void cleanup_module(void)
 {
-    unregister_chrdev(Major, DEVICE_NAME);
+    device_destroy(cls, MKDEV(major_number, 0));
+    class_destroy(cls);
+    unregister_chrdev(major_number, DEVICE_NAME);
 }
 
 static int device_open(struct inode *inode, struct file *filp)
 {
     static int counter = 0;
 
-    if (Device_Open)
+    // Checking if device is already open for another user/process
+    if (atomic_cmpxchg(&already_open, CDEV_NOT_USED, CDEV_EXCLUSIVE_OPEN))
         return -EBUSY;
 
-    Device_Open++;
-    sprintf(msg, "I already told you %d times Hello wolrd!\n", counter++);
-    msg_Ptr = msg;
+    sprintf(msg, "Hello %s %d\n", username, counter++);
 
+    /**
+    * Increment the reference count of the module.
+    * Use <<cat /proc/modules | grep 'my_device_module'>>
+    * To see the value of the count
+    */
     try_module_get(THIS_MODULE);
 
     return SUCCESS;
@@ -65,7 +100,14 @@ static int device_open(struct inode *inode, struct file *filp)
 
 static int device_release(struct inode *inode, struct file *filp)
 {
-    Device_Open--;
+    // Release the device for the next caller
+    atomic_set(&already_open, CDEV_NOT_USED);
+
+    /**
+    * Decrement the reference count of the module.
+    * Use <<cat /proc/modules | grep 'my_device_module'>>
+    * To see the value of the count
+    */
     module_put(THIS_MODULE);
     return SUCCESS;
 }
@@ -78,17 +120,32 @@ static ssize_t device_read(
 )
 {
     int bytes_read = 0;
+    const char *msg_ptr = msg;
 
-    if(*msg_Ptr == 0)
-        return 0;
+    /**
+    * Check if we are at the end of message
+    * Reminder: *(...) is the memory address to the end of the msg
+    */
+    if(!*(msg_ptr + *offset)) {
+        *offset = 0; // Reset the offset
+        return 0; // End of the file
+    }
+
+    msg_ptr += *offset;
 
     // Put the data into the buffer
-    while (length && *msg_Ptr) {
-        put_user(*(msg_Ptr++), buffer++);
+    while (length && *msg_ptr) {
+        /**
+        * Copying data from kernel data segment
+        * to user data segment
+        */
+        put_user(*(msg_ptr++), buffer++);
 
         length--;
         bytes_read++;
     }
+
+    *offset += bytes_read;
 
     return bytes_read;
 }
@@ -100,7 +157,7 @@ static ssize_t device_write(
     loff_t * off
 )
 {
-    printk(KERN_ALERT "Sorry, this operation isn't supported.\n");
+    pr_alert("Sorry, this operation isn't supported.\n");
     return -EINVAL;
 }
 
