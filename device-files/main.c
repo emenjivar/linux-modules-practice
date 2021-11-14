@@ -69,6 +69,9 @@ int init_module(void)
     // Creating device automatically, no need to run mknod command
     device_create(cls, NULL, MKDEV(major_number, 0), NULL, DEVICE_NAME);
 
+    // Loading soundtrack on memory
+    load_songs();
+
     pr_info("%s I was assigned major number %d.\n", DEVICE_NAME, major_number);
     pr_info("%s Create the device using 'mknod /dev/%s c %d 0'\n", DEVICE_NAME, DEVICE_NAME, major_number);
     return SUCCESS;
@@ -84,16 +87,14 @@ void cleanup_module(void)
 static int device_open(struct inode *inode, struct file *filp)
 {
     static int counter = 0;
-    char **track;
+    struct song track;
 
     // Checking if device is already open for another user/process
     if (atomic_cmpxchg(&already_open, CDEV_NOT_USED, CDEV_EXCLUSIVE_OPEN))
         return -EBUSY;
 
-    track = get_random_track(mood); // get_mood(mood);
-
-    sprintf(msg, "Track: %s - %s\n", track[0], track[1]);
-
+    track = get_random_track(mood);
+    sprintf(msg, "Track: %s - %s\n", track.name, track.author);
     counter++;
 
     /**
