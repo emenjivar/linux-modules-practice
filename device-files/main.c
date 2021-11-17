@@ -22,6 +22,7 @@ static ssize_t device_write(struct file *, const char *, size_t, loff_t *);
 
 #define SUCCESS 0
 #define DEVICE_NAME "my-device-module"
+#define TAG "[my-device-module]"
 #define BUF_LEN 80
 
 // Global variables are declared as static
@@ -59,7 +60,7 @@ int init_module(void)
     major_number = register_chrdev(0, DEVICE_NAME, &fops);
 
     if(major_number < 0) {
-        pr_alert("%s Registering char device failed with %d\n", DEVICE_NAME, major_number);
+        pr_alert("%s Registering char device failed with %d\n", TAG, major_number);
         return major_number;
     }
 
@@ -72,8 +73,7 @@ int init_module(void)
     // Loading soundtrack on memory
     load_songs();
 
-    pr_info("%s I was assigned major number %d.\n", DEVICE_NAME, major_number);
-    pr_info("%s Create the device using 'mknod /dev/%s c %d 0'\n", DEVICE_NAME, DEVICE_NAME, major_number);
+    pr_info("%s I was assigned major number %d.\n", TAG, major_number);
     return SUCCESS;
 }
 
@@ -118,6 +118,8 @@ static int device_release(struct inode *inode, struct file *filp)
     * To see the value of the count
     */
     module_put(THIS_MODULE);
+
+    pr_info("%s device released.\n", TAG);
     return SUCCESS;
 }
 
@@ -166,7 +168,7 @@ static ssize_t device_write(
     loff_t * off
 )
 {
-    pr_alert("Sorry, this operation isn't supported.\n");
+    pr_info("%s Sorry, read operation isn't supported.\n", TAG);
     return -EINVAL;
 }
 

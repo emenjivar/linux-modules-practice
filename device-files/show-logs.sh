@@ -1,2 +1,2 @@
 #!/bin/sh
-dmesg | grep 'my-device-module'
+dmesg | grep -e '\[my-device-module\]'
