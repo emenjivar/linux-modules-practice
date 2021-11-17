@@ -1,54 +1,39 @@
-# Steps after insert the module
-After executing ``insmod my-device-module.ko`` command, you must create the **device file** and assign the **major version** number. In order to do that, execute the next command:
+# How to use this module?
+This **device driver module** makes musical recommendations on the output according to your mood, when you read the **device driver** with **cat** or another command.
+
+## Mounting the driver
+When you compile the module, you can pass the parameter ``mood`` with any of the following values: **sad**, **lonely**, **happy** and **weird**. Where **sad** is the default value when you do not pass it.
+
 ```bash
-$ sudo dmesg | grep -e 'my-device-module'
-[24428.870720] my-device-module I was assigned major number 234.
-[24428.870728] my-device-module Create the device using 'mknod /dev/my-device-module c 234 0'
+$ sudo insmod my-device-module.ko mood=weird
 ```
 
-Run the show **mknod** command on the terminal, this will create a device file and assign a valid **major version**.
+After mounting the module, this will create a **device driver file** on **/dev/** directory, called **my-device-driver**.
+
+## Usage
+You must ``cat`` the file (or read using another command) to execute it, and every time the module will recommend you a random track according to the value of **mood** parameter.
 
 ```bash
-$ sudo mknod /dev/my-device-module c 234 0
+$ sudo cat /dev/my-device-module
+Track: 13 angels standing guard round the side of your bed - Silver Mt Zion
+
+$ sudo cat /dev/my-device-module
+Track: Mercy street - Peter Gabriel
+
+$ sudo cat /dev/my-device-module
+Track: Pneumonia - Bjork
 ```
 
-## Check if device was created
+You cannot write on **my-device-module** file, the operation is not allowed, even if you try using sudo.
 ```bash
-$ ls /dev
-... my-device-module
-
-$ more /proc/devices | grep 'my-device-module'
-234 my-device-module
-```
-
-# Testing the module
-To execute a module, you must ``cat`` the file, and every time the internal counter of module will increase +1. Write operations are not a allowed on the **device file**, so even as root, they will be blocked.
-```bash
-$ cat /dev/my-device-module
-I already told you 0 times Hello world!
-
-$ cat /dev/my-device-module
-I already told you 1 times Hello world!
-
-$ cat /dev/my-device-module
-I already told you 2 times Hello world!
-
-$ echo "Hello" > /dev/my-device-module
+$ sudo echo "hello" > /dev/my-device-module
 bash: /dev/my-device-module: Permission denied
-
-$ sudo dmesg | grep -e 'Sorry'
-[16401.765620] Sorry, this operation is not supported.
 ```
-# Remove a module
-Before to remove the module, execute the following command to make sure the file is not being used.
 
+## Remove from Linux
+After tested the module, you can remove using the following command:
 ```bash
-# The name of the module out the output uses "_" instead of "-"
-$ more /proc/modules | grep 'my_device_module'
-my_device_module 16384 0 - Live 0x0000000000000000 (OE)
+$ sudo rmmod my-device-driver
 ```
 
-Finally, if the third column of the output is 0 then you can remove the module safely.
-```bash
-$ sudo rmmod my-device-module
-```
+This command will remove the **device driver file** mounted on **/dev/** directory.
