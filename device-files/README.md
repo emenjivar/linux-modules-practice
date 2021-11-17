@@ -2,7 +2,7 @@
 This **device driver module** makes musical recommendations on the output according to your mood, when you read the **device driver** with **cat** or another command.
 
 ## Mounting the driver
-When you compile the module, you can pass the parameter ``mood`` with any of the following values: **sad**, **lonely**, **happy** and **weird**. Where **sad** is the default value when you do not pass it.
+When you mount the module, you can pass the parameter ``mood`` with any of the following values: **sad**, **lonely**, **happy** and **weird**. Where **sad** is the default value when you do not pass it.
 
 ```bash
 $ make
