@@ -5,6 +5,18 @@ This **device driver module** makes musical recommendations on the output accord
 When you compile the module, you can pass the parameter ``mood`` with any of the following values: **sad**, **lonely**, **happy** and **weird**. Where **sad** is the default value when you do not pass it.
 
 ```bash
+$ make
+make -C /lib/modules/5.11.0-40-generic/build M=/home/carlos/Documents/repositories/linux-modules-practice/device-files modules
+make[1]: Entering directory '/usr/src/linux-headers-5.11.0-40-generic'
+  CC [M]  /home/carlos/Documents/repositories/linux-modules-practice/device-files/main.o
+  LD [M]  /home/carlos/Documents/repositories/linux-modules-practice/device-files/my-device-module.o
+  MODPOST /home/carlos/Documents/repositories/linux-modules-practice/device-files/Module.symvers
+  CC [M]  /home/carlos/Documents/repositories/linux-modules-practice/device-files/my-device-module.mod.o
+  LD [M]  /home/carlos/Documents/repositories/linux-modules-practice/device-files/my-device-module.ko
+  BTF [M] /home/carlos/Documents/repositories/linux-modules-practice/device-files/my-device-module.ko
+Skipping BTF generation for /home/carlos/Documents/repositories/linux-modules-practice/device-files/my-device-module.ko due to unavailability of vmlinux
+make[1]: Leaving directory '/usr/src/linux-headers-5.11.0-40-generic'
+
 $ sudo insmod my-device-module.ko mood=weird
 ```
 
