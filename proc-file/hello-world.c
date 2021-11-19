@@ -8,6 +8,7 @@
 #include <linux/proc_fs.h>
 #include <linux/uaccess.h>
 #include <linux/version.h>
+#include <linux/string.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -26,26 +27,31 @@ static struct proc_dir_entry *our_proc_file;
 */
 static ssize_t procfile_read(struct file *ptrFile, char __user *buffer, size_t buffer_length, loff_t *offset)
 {
-    char s[13] = "HelloWorld!\n";
-    int len = sizeof(s);
-    ssize_t ret = len;
+
+    char *message = "Humans cannot create anything out of nothingness.\n";
+
+    size_t length = strlen(message);
+    ssize_t ret = length;
+
 
     /**
     * copy_to_user returns the number of bytes not copied
     * 0 means success and TRUE inside the IF sentence
     */
-    int copied_bytes = copy_to_user(buffer, s, len);
+
+    int copied_bytes = copy_to_user(buffer, message, length);
 
     /**
     * desreference the offset pointer, accessing to offset value
     * check if the offset is still, in the file.
     */
-    if(*offset >= len || copied_bytes) {
+
+    if(*offset >= length || copied_bytes) {
         pr_info("%s copy_to_user failed\n", TAG);
         ret = 0;
     } else {
         pr_info("%s procfile read: %s\n", TAG, ptrFile->f_path.dentry->d_name.name);
-        *offset += len;
+        *offset += length;
     }
 
     return ret;
