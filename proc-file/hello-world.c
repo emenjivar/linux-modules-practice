@@ -35,12 +35,9 @@ static unsigned long procfs_buffer_size = 0;
 */
 static ssize_t procfile_read(struct file *ptrFile, char __user *buffer, size_t buffer_length, loff_t *offset)
 {
-
     char *message = "Humans cannot create anything out of nothingness.\n";
-
     size_t length = strlen(message);
     ssize_t ret = length;
-
 
     /**
     * copy_to_user returns the number of bytes not copied
@@ -53,7 +50,6 @@ static ssize_t procfile_read(struct file *ptrFile, char __user *buffer, size_t b
     * desreference the offset pointer, accessing to offset value
     * check if the offset is still, in the file.
     */
-
     if(*offset >= length || copied_bytes) {
         pr_info("%s copy_to_user failed\n", TAG);
         ret = 0;
@@ -70,7 +66,10 @@ static ssize_t procfile_read(struct file *ptrFile, char __user *buffer, size_t b
 */
 static ssize_t procfile_write(struct file *file, const char __user *buff, size_t len, loff_t *off)
 {
+    pr_info("%s\n", TAG);
     pr_info("%s start writting...", TAG);
+    pr_info("%s lenght of writting: %zu\n", TAG, len);
+
     procfs_buffer_size = len;
     if(procfs_buffer_size > PROCFS_MAX_SIZE) {
         procfs_buffer_size = PROCFS_MAX_SIZE;
@@ -80,7 +79,12 @@ static ssize_t procfile_write(struct file *file, const char __user *buff, size_t
         return -EFAULT;
     }
 
+    /**
+    * If the string exceeds the size of the buffer,
+    * the string will be empty
+    */
     procfs_buffer[procfs_buffer_size & (PROCFS_MAX_SIZE - 1)] = '\0';
+    pr_info("%s procfs_buffer_size=%lu\n", TAG, procfs_buffer_size);
     pr_info("%s procfile write %s\n", TAG, procfs_buffer);
 
     return procfs_buffer_size;
