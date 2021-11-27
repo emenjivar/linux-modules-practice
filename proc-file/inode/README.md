@@ -12,3 +12,16 @@ $ echo "Your soul is the world." > /proc/hello-world-inode
 $ cat /proc/hello-world-inode
 Your soul is the world.
 ```
+
+## Debugging
+If you want to read the generated logs for this module, try executing the following command
+```bash
+$ sudo dmesg | grep '\[hello-world-inode\]'
+[37252.540578] [hello-world-inode] /proc/hello-world-inode created
+[37535.512747] [hello-world-inode] my_write 90 bytes
+[37541.893993] [hello-world-inode] my_read 90 bytes
+[37541.894021] [hello-world-inode] my_read end
+[37558.933258] [hello-world-inode] my_write 29 bytes
+[37563.998585] [hello-world-inode] my_read 29 bytes
+[37563.998619] [hello-world-inode] my_read end
+``` 
