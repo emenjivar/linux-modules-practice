@@ -4,6 +4,8 @@
 #include <linux/sched.h>
 #include <linux/uaccess.h>
 #include <linux/version.h>
+#include <linux/slab.h> // kmalloc
+#include <linux/string.h> // strncpy
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -38,18 +40,25 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 }
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
-    if (len > PROCFS_MAX_SIZE) {
-        procfs_buffer_size = PROCFS_MAX_SIZE;
-    } else {
-        procfs_buffer_size = len;
-    }
+    unsigned long local_buffer_size = len;
+    char *local_buffer = kmalloc(len, GFP_KERNEL);
+    char end_line = '\n';
 
-    if (copy_from_user(procfs_buffer, buffer, procfs_buffer_size)) {
+    if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
     }
 
-    pr_info("%s my_write %lu bytes\n", TAG, procfs_buffer_size);
-    return procfs_buffer_size;
+    // Concat local buffer to global buffer
+    strncat(procfs_buffer, local_buffer, strlen(local_buffer) - 1);
+    strncat(procfs_buffer, &end_line, 1);
+
+    procfs_buffer_size += strlen(local_buffer);
+
+    pr_info("%s local_buffer: %s\n", TAG, local_buffer);
+    pr_info("%s global_buffer: %s\n", TAG, procfs_buffer);
+    pr_info("%s\n", TAG);
+
+    return local_buffer_size;
 }
 
 static int my_open(struct inode *inode, struct file *file)
@@ -100,7 +109,7 @@ static int __init proc_init(void)
 static void __exit proc_exit(void)
 {
     remove_proc_entry(PROCFS_FILENAME, NULL);
-    pr_info("%s /proc/%s removed\n", TAG, PROCFS_FILENAME);
+    pr_info("%s /proc/%s removed\n\n", TAG, PROCFS_FILENAME);
 }
 
 module_init(proc_init);
