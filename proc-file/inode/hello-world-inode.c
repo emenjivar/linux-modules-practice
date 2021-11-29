@@ -18,6 +18,7 @@
 static struct proc_dir_entry *my_proc_file;
 static char procfs_buffer[PROCFS_MAX_SIZE];
 static unsigned long procfs_buffer_size = 0;
+char end_line = '\n';
 
 static ssize_t my_read(struct file *file, char __user *buffer, size_t length, loff_t *offset)
 {
@@ -40,9 +41,7 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 }
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
-    unsigned long local_buffer_size = len;
     char *local_buffer = kmalloc(len, GFP_KERNEL);
-    char end_line = '\n';
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
@@ -57,8 +56,7 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     pr_info("%s local_buffer: %s\n", TAG, local_buffer);
     pr_info("%s global_buffer: %s\n", TAG, procfs_buffer);
     pr_info("%s\n", TAG);
-
-    return local_buffer_size;
+    return len;
 }
 
 static int my_open(struct inode *inode, struct file *file)
