@@ -6,6 +6,9 @@
 #include <linux/version.h>
 #include <linux/slab.h> // kmalloc
 #include <linux/string.h> // strncpy
+#include <linux/timekeeping.h>
+#define SECONDS_ON_YEAR 31557600
+#define SECONDS_ON_DAY 86400
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -42,19 +45,50 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
     char *local_buffer = kmalloc(len, GFP_KERNEL);
+    //char *string_date = kmalloc(13, GFP_KERNEL);
+
+    struct timespec64 time;
+    u64 year;
+    u64 day_of_year;
+
+    int months[12] = {
+        31, 28, 31,
+        30, 31, 30,
+        31, 31, 30,
+        31, 30, 31
+    };
+
+    int acum = 0;
+    int day_of_month = 0;
+    int current_month = 0;
+
+    ktime_get_real_ts64(&time);
+    year = 1970 + time.tv_sec / SECONDS_ON_YEAR;
+    day_of_year = time.tv_sec % SECONDS_ON_YEAR / SECONDS_ON_DAY;
+
+    for(current_month=0; current_month<12; current_month++) {
+        acum += months[current_month];
+        if(acum > day_of_year) {
+            day_of_month = months[current_month] - (acum - day_of_year);
+            break;
+        }
+    }
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
     }
 
+
+    // Concat timestamp
+    //snprintf(string_date, 13, "[%llu-%d-%d]", year, current_month, day_of_month);
+    //pr_info("%s formatted date: %s", TAG, string_date);
+
     // Concat local buffer to global buffer
+    //strncat(procfs_buffer, string_date, strlen(string_date) - 1);
     strncat(procfs_buffer, local_buffer, strlen(local_buffer) - 1);
     strncat(procfs_buffer, &end_line, 1);
-
     procfs_buffer_size += strlen(local_buffer);
 
-    pr_info("%s local_buffer: %s\n", TAG, local_buffer);
-    pr_info("%s global_buffer: %s\n", TAG, procfs_buffer);
     pr_info("%s\n", TAG);
     return len;
 }
