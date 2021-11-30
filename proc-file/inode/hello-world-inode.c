@@ -7,8 +7,11 @@
 #include <linux/slab.h> // kmalloc
 #include <linux/string.h> // strncpy
 #include <linux/timekeeping.h>
-#define SECONDS_ON_YEAR 31557600
+#define SECONDS_ON_YEAR 31556952
 #define SECONDS_ON_DAY 86400
+#define SECONDS_ON_HOUR 3600
+#define SECONDS_ON_MINUTE 60
+#define MILLISECONDS_ON_SECOND 1000
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -45,11 +48,15 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
     char *local_buffer = kmalloc(len, GFP_KERNEL);
-    //char *string_date = kmalloc(13, GFP_KERNEL);
+    char *string_date = kmalloc(27, GFP_KERNEL);
 
     struct timespec64 time;
     u64 year;
     u64 day_of_year;
+    int current_hour;
+    int current_minute;
+    int current_second;
+    int current_millisecond;
 
     int months[12] = {
         31, 28, 31,
@@ -65,10 +72,14 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     ktime_get_real_ts64(&time);
     year = 1970 + time.tv_sec / SECONDS_ON_YEAR;
     day_of_year = time.tv_sec % SECONDS_ON_YEAR / SECONDS_ON_DAY;
+    current_hour = time.tv_sec % SECONDS_ON_DAY / SECONDS_ON_HOUR;
+    current_minute = time.tv_sec % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
+    current_second = time.tv_sec % SECONDS_ON_MINUTE;
+    current_millisecond = time.tv_sec % MILLISECONDS_ON_SECOND;
 
     for(current_month=0; current_month<12; current_month++) {
         acum += months[current_month];
-        if(acum > day_of_year) {
+        if(acum >= day_of_year) {
             day_of_month = months[current_month] - (acum - day_of_year);
             break;
         }
@@ -78,16 +89,22 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
         return -EFAULT;
     }
 
+    pr_info("%s day_of_year: %llu\n", TAG, day_of_year);
+    pr_info("%s total current_seconds: %llu\n", TAG, time.tv_sec);
+    pr_info("%s total current_milliseconds: %lu\n", TAG ,time.tv_nsec);
+    pr_info("%s current_hour: %d\n", TAG, current_hour);
+    pr_info("%s current_minute: %d\n", TAG, current_minute);
+    pr_info("%s current_second: %d\n", TAG, current_second);
+    pr_info("%s current_millisecond: %d\n", TAG, current_millisecond);
 
     // Concat timestamp
-    //snprintf(string_date, 13, "[%llu-%d-%d]", year, current_month, day_of_month);
-    //pr_info("%s formatted date: %s", TAG, string_date);
+    snprintf(string_date, 27, "[%llu-%d-%d %d:%d:%d:%d] ", year, current_month + 1, day_of_month, current_hour, current_minute, current_second, current_millisecond);
 
     // Concat local buffer to global buffer
-    //strncat(procfs_buffer, string_date, strlen(string_date) - 1);
+    strncat(procfs_buffer, string_date, strlen(string_date));
     strncat(procfs_buffer, local_buffer, strlen(local_buffer) - 1);
     strncat(procfs_buffer, &end_line, 1);
-    procfs_buffer_size += strlen(local_buffer);
+    procfs_buffer_size += strlen(local_buffer) + strlen(string_date);
 
     pr_info("%s\n", TAG);
     return len;
