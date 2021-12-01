@@ -21,6 +21,17 @@
 #define PROCFS_FILENAME "hello-world-inode"
 #define TAG "[hello-world-inode]"
 
+struct current_time {
+    unsigned short int year;
+    unsigned char month;
+    unsigned char day;
+    unsigned short int day_of_year;
+    unsigned char hours;
+    unsigned char minutes;
+    unsigned char seconds;
+    unsigned short int milliseconds;
+};
+
 static struct proc_dir_entry *my_proc_file;
 static char procfs_buffer[PROCFS_MAX_SIZE];
 static unsigned long procfs_buffer_size = 0;
@@ -51,12 +62,7 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     char *string_date = kmalloc(27, GFP_KERNEL);
 
     struct timespec64 time;
-    u64 year;
-    u64 day_of_year;
-    int current_hour;
-    int current_minute;
-    int current_second;
-    int current_millisecond;
+    struct current_time now;
 
     int months[12] = {
         31, 28, 31,
@@ -70,35 +76,31 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     int current_month = 0;
 
     ktime_get_real_ts64(&time);
-    year = 1970 + time.tv_sec / SECONDS_ON_YEAR;
-    day_of_year = time.tv_sec % SECONDS_ON_YEAR / SECONDS_ON_DAY;
-    current_hour = time.tv_sec % SECONDS_ON_DAY / SECONDS_ON_HOUR;
-    current_minute = time.tv_sec % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
-    current_second = time.tv_sec % SECONDS_ON_MINUTE;
-    current_millisecond = time.tv_sec % MILLISECONDS_ON_SECOND;
+    now.year = 1970 + time.tv_sec / SECONDS_ON_YEAR;;
+    now.day_of_year = time.tv_sec % SECONDS_ON_YEAR / SECONDS_ON_DAY;
 
     for(current_month=0; current_month<12; current_month++) {
         acum += months[current_month];
-        if(acum >= day_of_year) {
-            day_of_month = months[current_month] - (acum - day_of_year);
+        if(acum >= now.day_of_year) {
+            day_of_month = months[current_month] - (acum - now.day_of_year);
             break;
         }
     }
+
+
+    now.month = current_month;
+    now.day = day_of_month;
+    now.hours = time.tv_sec % SECONDS_ON_DAY / SECONDS_ON_HOUR;
+    now.minutes = time.tv_sec % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
+    now.seconds = time.tv_sec % SECONDS_ON_MINUTE;
+    now.milliseconds = time.tv_sec % MILLISECONDS_ON_SECOND;
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
     }
 
-    pr_info("%s day_of_year: %llu\n", TAG, day_of_year);
-    pr_info("%s total current_seconds: %llu\n", TAG, time.tv_sec);
-    pr_info("%s total current_milliseconds: %lu\n", TAG ,time.tv_nsec);
-    pr_info("%s current_hour: %d\n", TAG, current_hour);
-    pr_info("%s current_minute: %d\n", TAG, current_minute);
-    pr_info("%s current_second: %d\n", TAG, current_second);
-    pr_info("%s current_millisecond: %d\n", TAG, current_millisecond);
-
     // Concat timestamp
-    snprintf(string_date, 27, "[%llu-%d-%d %d:%d:%d:%d] ", year, current_month + 1, day_of_month, current_hour, current_minute, current_second, current_millisecond);
+    snprintf(string_date, 27, "[%d-%d-%d %d:%d:%d:%d] ", now.year, now.month, now.day, now.hours, now.minutes, now.seconds, now.milliseconds);
 
     // Concat local buffer to global buffer
     strncat(procfs_buffer, string_date, strlen(string_date));
