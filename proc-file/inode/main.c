@@ -1,5 +1,6 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/proc_fs.h>
 #include <linux/sched.h>
 #include <linux/uaccess.h>
@@ -15,6 +16,13 @@
 #define PROCFS_MAX_SIZE 2048
 #define PROCFS_FILENAME "hello-world-inode"
 #define TAG "[hello-world-inode]"
+
+/**
+* Module paramters
+*/
+static int utc_offset = 0;
+module_param(utc_offset, int, 0000);
+MODULE_PARM_DESC(utc_offset, "UTC offset timezone, default 0");
 
 static struct proc_dir_entry *my_proc_file;
 static char procfs_buffer[PROCFS_MAX_SIZE];
@@ -43,7 +51,7 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
     char *local_buffer = kmalloc(len, GFP_KERNEL);
-    char *string_date = format_current_time();
+    char *string_date = format_current_time(utc_offset);
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;

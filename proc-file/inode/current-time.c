@@ -65,11 +65,13 @@ char *format_time(const long long int current_milliseconds) {
     return string_date;
 }
 
-char *format_current_time(void) {
+char *format_current_time(const int utc_offset) {
     struct timespec64 time;
+    long long int utc_offset_hours;
 
     // Get the current unix time
     ktime_get_real_ts64(&time);
+    utc_offset_hours = SECONDS_ON_HOUR * utc_offset;
 
-    return format_time(time.tv_sec);
+    return format_time(time.tv_sec + utc_offset_hours);
 }

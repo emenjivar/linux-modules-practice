@@ -26,4 +26,4 @@ char *format_time(const long long int current_milliseconds);
 * [yyyy-MM-dd hh:mm:ss] => [2021-11-4 20:43:33]
 * The date is in no UTC offset (yet)
 */
-char *format_current_time(void);
+char *format_current_time(const int utc_offset);
