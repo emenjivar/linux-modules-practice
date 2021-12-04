@@ -43,12 +43,7 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
     char *local_buffer = kmalloc(len, GFP_KERNEL);
-    char *string_date;
-
-    struct timespec64 time;
-
-    ktime_get_real_ts64(&time);
-    string_date = format_current_time(time.tv_sec);
+    char *string_date = format_current_time();
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
@@ -59,7 +54,6 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     strncat(procfs_buffer, local_buffer, strlen(local_buffer) - 1);
     strncat(procfs_buffer, &end_line, 1);
     procfs_buffer_size += strlen(local_buffer) + strlen(string_date);
-    
     return len;
 }
 

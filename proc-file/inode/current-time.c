@@ -3,7 +3,7 @@
 #include "current-time.h"
 
 #define DATETIME_SIZE 22
-#define SECONDS_ON_YEAR 31556952
+#define SECONDS_ON_YEAR 31556952 // Acording to gregorian calendar
 #define SECONDS_ON_DAY 86400
 #define SECONDS_ON_HOUR 3600
 #define SECONDS_ON_MINUTE 60
@@ -23,7 +23,8 @@ struct current_time *get_current_time(const long long int current_milliseconds) 
     int day_of_month = 0;
     int current_month = 0;
 
-    now->year = 1970 + current_milliseconds / SECONDS_ON_YEAR;;
+    // Unix time start from 1970
+    now->year = 1970 + current_milliseconds / SECONDS_ON_YEAR;
     now->day_of_year = current_milliseconds % SECONDS_ON_YEAR / SECONDS_ON_DAY;
 
     for(current_month=0; current_month<12; current_month++) {
@@ -44,7 +45,7 @@ struct current_time *get_current_time(const long long int current_milliseconds) 
     return now;
 }
 
-char *format_current_time(const long long int current_milliseconds) {
+char *format_time(const long long int current_milliseconds) {
     char *string_date = kmalloc(DATETIME_SIZE, GFP_KERNEL);
     struct current_time *now = get_current_time(current_milliseconds);
 
@@ -62,4 +63,13 @@ char *format_current_time(const long long int current_milliseconds) {
     );
 
     return string_date;
+}
+
+char *format_current_time(void) {
+    struct timespec64 time;
+
+    // Get the current unix time
+    ktime_get_real_ts64(&time);
+
+    return format_time(time.tv_sec);
 }
