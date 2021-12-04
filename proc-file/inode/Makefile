@@ -1,5 +1,5 @@
-obj-m += main.o
-main-objs := hello-world-inode.o my_current_time.o
+obj-m += hello-world-inode.o
+hello-world-inode-objs := main.o current-time.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

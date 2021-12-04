@@ -6,7 +6,7 @@
 #include <linux/version.h>
 #include <linux/slab.h> // kmalloc
 #include <linux/string.h> // strncpy
-#include "my_current_time.h"
+#include "current-time.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
