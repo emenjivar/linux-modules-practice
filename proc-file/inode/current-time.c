@@ -2,6 +2,7 @@
 #include <linux/slab.h> // kmalloc
 #include "current-time.h"
 
+#define DATETIME_SIZE 22
 #define SECONDS_ON_YEAR 31556952
 #define SECONDS_ON_DAY 86400
 #define SECONDS_ON_HOUR 3600
@@ -44,21 +45,20 @@ struct current_time *get_current_time(const long long int current_milliseconds) 
 }
 
 char *format_current_time(const long long int current_milliseconds) {
-    char *string_date = kmalloc(27, GFP_KERNEL);
+    char *string_date = kmalloc(DATETIME_SIZE, GFP_KERNEL);
     struct current_time *now = get_current_time(current_milliseconds);
 
     // Formatting datetime on string
     snprintf(
         string_date,
-        27,
-        "[%d-%d-%d %d:%d:%d:%d] ",
+        DATETIME_SIZE,
+        "[%d-%d-%d %d:%d:%d] ",
         now->year,
         now->month,
         now->day,
         now->hours,
         now->minutes,
-        now->seconds,
-        now->milliseconds
+        now->seconds
     );
 
     return string_date;
