@@ -10,10 +10,10 @@
 #define MILLISECONDS_ON_SECOND 1000
 
 int months[12] = {
-    31, 28, 31,
-    30, 31, 30,
-    31, 31, 30,
-    31, 30, 31
+    31, 28, 31, // Jan, Feb, Mar
+    30, 31, 30, // Apr, May, Jun
+    31, 31, 30, // Jul, Ago, Sep
+    31, 30, 31  // Oct, Nov, Dic
 };
 
 struct current_time *get_current_time(const long long int current_milliseconds) {
