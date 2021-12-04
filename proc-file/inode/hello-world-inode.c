@@ -6,12 +6,7 @@
 #include <linux/version.h>
 #include <linux/slab.h> // kmalloc
 #include <linux/string.h> // strncpy
-#include <linux/timekeeping.h>
-#define SECONDS_ON_YEAR 31556952
-#define SECONDS_ON_DAY 86400
-#define SECONDS_ON_HOUR 3600
-#define SECONDS_ON_MINUTE 60
-#define MILLISECONDS_ON_SECOND 1000
+#include "my_current_time.h"
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
 #define HAVE_PROC_OPS
@@ -20,17 +15,6 @@
 #define PROCFS_MAX_SIZE 2048
 #define PROCFS_FILENAME "hello-world-inode"
 #define TAG "[hello-world-inode]"
-
-struct current_time {
-    unsigned short int year;
-    unsigned char month;
-    unsigned char day;
-    unsigned short int day_of_year;
-    unsigned char hours;
-    unsigned char minutes;
-    unsigned char seconds;
-    unsigned short int milliseconds;
-};
 
 static struct proc_dir_entry *my_proc_file;
 static char procfs_buffer[PROCFS_MAX_SIZE];
@@ -61,39 +45,11 @@ static ssize_t my_write(struct file *file, const char __user *buffer, size_t len
     char *local_buffer = kmalloc(len, GFP_KERNEL);
     char *string_date = kmalloc(27, GFP_KERNEL);
 
-    struct timespec64 time;
     struct current_time now;
-
-    int months[12] = {
-        31, 28, 31,
-        30, 31, 30,
-        31, 31, 30,
-        31, 30, 31
-    };
-
-    int acum = 0;
-    int day_of_month = 0;
-    int current_month = 0;
+    struct timespec64 time;
 
     ktime_get_real_ts64(&time);
-    now.year = 1970 + time.tv_sec / SECONDS_ON_YEAR;;
-    now.day_of_year = time.tv_sec % SECONDS_ON_YEAR / SECONDS_ON_DAY;
-
-    for(current_month=0; current_month<12; current_month++) {
-        acum += months[current_month];
-        if(acum >= now.day_of_year) {
-            day_of_month = months[current_month] - (acum - now.day_of_year);
-            break;
-        }
-    }
-
-
-    now.month = current_month;
-    now.day = day_of_month;
-    now.hours = time.tv_sec % SECONDS_ON_DAY / SECONDS_ON_HOUR;
-    now.minutes = time.tv_sec % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
-    now.seconds = time.tv_sec % SECONDS_ON_MINUTE;
-    now.milliseconds = time.tv_sec % MILLISECONDS_ON_SECOND;
+    now = get_current_time(time.tv_sec);
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
