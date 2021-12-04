@@ -9,4 +9,5 @@ struct current_time {
     unsigned short int milliseconds;
 };
 
-struct current_time get_current_time(long long int current_milliseconds);
+struct current_time *get_current_time(const long long int current_milliseconds);
+char *format_current_time(const long long int current_milliseconds);

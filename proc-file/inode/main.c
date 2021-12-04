@@ -43,28 +43,23 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t length, lo
 
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off) {
     char *local_buffer = kmalloc(len, GFP_KERNEL);
-    char *string_date = kmalloc(27, GFP_KERNEL);
+    char *string_date;
 
-    struct current_time now;
     struct timespec64 time;
 
     ktime_get_real_ts64(&time);
-    now = get_current_time(time.tv_sec);
+    string_date = format_current_time(time.tv_sec);
 
     if (copy_from_user(local_buffer, buffer, len)) {
         return -EFAULT;
     }
-
-    // Concat timestamp
-    snprintf(string_date, 27, "[%d-%d-%d %d:%d:%d:%d] ", now.year, now.month, now.day, now.hours, now.minutes, now.seconds, now.milliseconds);
 
     // Concat local buffer to global buffer
     strncat(procfs_buffer, string_date, strlen(string_date));
     strncat(procfs_buffer, local_buffer, strlen(local_buffer) - 1);
     strncat(procfs_buffer, &end_line, 1);
     procfs_buffer_size += strlen(local_buffer) + strlen(string_date);
-
-    pr_info("%s\n", TAG);
+    
     return len;
 }
 
