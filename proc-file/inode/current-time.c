@@ -62,69 +62,69 @@ int is_leap_year(unsigned short int year)
 
 struct current_time *get_current_time(const long long int current_milliseconds)
 {
-    struct current_time *now = kmalloc(sizeof(struct current_time), GFP_KERNEL);
-    int leap_year;
-    int *array_months;
-    int *array_months_acum;
-    int day_of_month = 0;
-    int current_month = 0;
+        struct current_time *now = kmalloc(sizeof(struct current_time), GFP_KERNEL);
+        int leap_year;
+        int *array_months;
+        int *array_months_acum;
+        int day_of_month = 0;
+        int current_month = 0;
 
-    // Unix time start from 1970
-    now->year = 1970 + current_milliseconds / SECONDS_ON_YEAR;
-    leap_year = is_leap_year(now->year);
+        // Unix time start from 1970
+        now->year = 1970 + current_milliseconds / SECONDS_ON_YEAR;
+        leap_year = is_leap_year(now->year);
 
-    // Choosing the appropriate array according to the type of year
-    array_months = leap_year ? months_leap_year : months;
-    array_months_acum = leap_year ? acum_days_month_leap_year : acum_days_month;
+        // Choosing the appropriate array according to the type of year
+        array_months = leap_year ? months_leap_year : months;
+        array_months_acum = leap_year ? acum_days_month_leap_year : acum_days_month;
 
-    now->day_of_year = current_milliseconds % SECONDS_ON_YEAR / SECONDS_ON_DAY;
+        now->day_of_year = current_milliseconds % SECONDS_ON_YEAR / SECONDS_ON_DAY;
 
-    for (current_month=0; current_month<12; current_month++) {
-        if (array_months_acum[current_month] >= now->day_of_year) {
-            day_of_month = array_months[current_month] - (array_months_acum[current_month] - now->day_of_year);
-            break;
+        for (current_month=0; current_month<12; current_month++) {
+                if (array_months_acum[current_month] >= now->day_of_year) {
+                        day_of_month = array_months[current_month] - (array_months_acum[current_month] - now->day_of_year);
+                        break;
+                }
         }
-    }
 
-    now->month = current_month;
-    now->day = day_of_month;
-    now->hours = current_milliseconds % SECONDS_ON_DAY / SECONDS_ON_HOUR;
-    now->minutes = current_milliseconds % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
-    now->seconds = current_milliseconds % SECONDS_ON_MINUTE;
-    now->milliseconds = current_milliseconds % MILLISECONDS_ON_SECOND;
+        now->month = current_month;
+        now->day = day_of_month;
+        now->hours = current_milliseconds % SECONDS_ON_DAY / SECONDS_ON_HOUR;
+        now->minutes = current_milliseconds % SECONDS_ON_HOUR / SECONDS_ON_MINUTE;
+        now->seconds = current_milliseconds % SECONDS_ON_MINUTE;
+        now->milliseconds = current_milliseconds % MILLISECONDS_ON_SECOND;
 
-    return now;
+        return now;
 }
 
 char *format_time(const long long int current_milliseconds)
 {
-    char *string_date = kmalloc(DATETIME_SIZE, GFP_KERNEL);
-    struct current_time *now = get_current_time(current_milliseconds);
+        char *string_date = kmalloc(DATETIME_SIZE, GFP_KERNEL);
+        struct current_time *now = get_current_time(current_milliseconds);
 
-    // Formatting datetime on string
-    snprintf(
-        string_date,
-        DATETIME_SIZE,
-        "[%d-%d-%d %d:%d:%d] ",
-        now->year,
-        now->month,
-        now->day,
-        now->hours,
-        now->minutes,
-        now->seconds
-    );
+        // Formatting datetime on string
+        snprintf(
+                string_date,
+                DATETIME_SIZE,
+                "[%d-%d-%d %d:%d:%d] ",
+                now->year,
+                now->month,
+                now->day,
+                now->hours,
+                now->minutes,
+                now->seconds
+        );
 
-    return string_date;
+        return string_date;
 }
 
 char *format_current_time(const int utc_offset)
 {
-    struct timespec64 time;
-    long long int utc_offset_hours;
+        struct timespec64 time;
+        long long int utc_offset_hours;
 
-    // Get the current unix time
-    ktime_get_real_ts64(&time);
-    utc_offset_hours = SECONDS_ON_HOUR * utc_offset;
+        // Get the current unix time
+        ktime_get_real_ts64(&time);
+        utc_offset_hours = SECONDS_ON_HOUR * utc_offset;
 
-    return format_time(time.tv_sec + utc_offset_hours);
+        return format_time(time.tv_sec + utc_offset_hours);
 }
