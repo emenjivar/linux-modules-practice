@@ -8,22 +8,24 @@
 #define SECONDS_ON_HOUR 3600
 #define SECONDS_ON_MINUTE 60
 #define MILLISECONDS_ON_SECOND 1000
+#define TRUE 1
+#define FALSE 0
 
 /**
 * Number of days in each month
 */
 int months[12] = {
-    31, 28, 31, // Jan, Feb, Mar
-    30, 31, 30, // Apr, May, Jun
-    31, 31, 30, // Jul, Ago, Sep
-    31, 30, 31  // Oct, Nov, Dic
+        31, 28, 31, // Jan, Feb, Mar
+        30, 31, 30, // Apr, May, Jun
+        31, 31, 30, // Jul, Ago, Sep
+        31, 30, 31  // Oct, Nov, Dic
 };
 
 int months_leap_year[12] = {
-    31, 29, 31, // Jan, Feb, Mar
-    30, 31, 30, // Apr, May, Jun
-    31, 31, 30, // Jul, Ago, Sep
-    31, 30, 31  // Oct, Nov, Dic
+        31, 29, 31, // Jan, Feb, Mar
+        30, 31, 30, // Apr, May, Jun
+        31, 31, 30, // Jul, Ago, Sep
+        31, 30, 31  // Oct, Nov, Dic
 };
 
 /**
@@ -31,10 +33,10 @@ int months_leap_year[12] = {
 * for every month during a normal year (365 days)
 */
 int acum_days_month[12] = {
-    31 ,  59,  90, // Jan, Feb, Mar
-    120, 151, 181, // Apr, May, Jun
-    212, 242, 273, // Jul, Ago, Sep
-    304, 334, 365  // Oct, Nov, Dic
+        31 ,  59,  90, // Jan, Feb, Mar
+        120, 151, 181, // Apr, May, Jun
+        212, 242, 273, // Jul, Ago, Sep
+        304, 334, 365  // Oct, Nov, Dic
 };
 
 /**
@@ -42,23 +44,24 @@ int acum_days_month[12] = {
 * for every month during a leap year (366 days)
 */
 int acum_days_month_leap_year[12] = {
-    31,   60,  91, // Jan, Feb, Mar
-    121, 152, 182, // Apr, May, Jun
-    213, 243, 274, // Jul, Ago, Sep
-    305, 335, 366  // Oct, Nov, Dic
+        31,   60,  91, // Jan, Feb, Mar
+        121, 152, 182, // Apr, May, Jun
+        213, 243, 274, // Jul, Ago, Sep
+        305, 335, 366  // Oct, Nov, Dic
 };
 
-int is_leap_year(unsigned short int year) {
-    if(year % 4 == 0 && year % 100 == 0 && year % 400 == 0) {
-        return 1;
-    } else if(year % 4 == 0 && year % 100 != 0) {
-        return 1;
-    } else {
-        return 0;
-    }
+int is_leap_year(unsigned short int year)
+{
+        if (year % 4 == 0 && year % 100 == 0 && year % 400 == 0)
+                return TRUE;
+        else if(year % 4 == 0 && year % 100 != 0)
+                return TRUE;
+        else
+                return FALSE;
 }
 
-struct current_time *get_current_time(const long long int current_milliseconds) {
+struct current_time *get_current_time(const long long int current_milliseconds)
+{
     struct current_time *now = kmalloc(sizeof(struct current_time), GFP_KERNEL);
     int leap_year;
     int *array_months;
@@ -76,8 +79,8 @@ struct current_time *get_current_time(const long long int current_milliseconds) 
 
     now->day_of_year = current_milliseconds % SECONDS_ON_YEAR / SECONDS_ON_DAY;
 
-    for(current_month=0; current_month<12; current_month++) {
-        if(array_months_acum[current_month] >= now->day_of_year) {
+    for (current_month=0; current_month<12; current_month++) {
+        if (array_months_acum[current_month] >= now->day_of_year) {
             day_of_month = array_months[current_month] - (array_months_acum[current_month] - now->day_of_year);
             break;
         }
@@ -93,7 +96,8 @@ struct current_time *get_current_time(const long long int current_milliseconds) 
     return now;
 }
 
-char *format_time(const long long int current_milliseconds) {
+char *format_time(const long long int current_milliseconds)
+{
     char *string_date = kmalloc(DATETIME_SIZE, GFP_KERNEL);
     struct current_time *now = get_current_time(current_milliseconds);
 
@@ -113,7 +117,8 @@ char *format_time(const long long int current_milliseconds) {
     return string_date;
 }
 
-char *format_current_time(const int utc_offset) {
+char *format_current_time(const int utc_offset)
+{
     struct timespec64 time;
     long long int utc_offset_hours;
 
