@@ -1,5 +1,5 @@
 # About this module
-This is a simple proc module with handle writing and reading operations, displaying the data such as a logs, including a timestamp for every writing action.
+This is a simple proc module that handle writing and reading operations, displaying the data such as a logs, including a timestamp for every writing action.
 
 ## Parameters
 | Name | Type | Default value |
