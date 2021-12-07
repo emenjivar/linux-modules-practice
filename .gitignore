@@ -6,4 +6,5 @@
 *.symvers
 *.order
 *.o.d
+*.c.swp
 .vscode/
