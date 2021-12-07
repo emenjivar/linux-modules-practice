@@ -14,6 +14,7 @@
 static void *my_seq_start(struct seq_file *s, loff_t *pos)
 {
 	static unsigned long counter = 0;
+	pr_info("%s my_seq_start\n", TAG);
 
 	if(*pos == 0) {
 		return &counter;
@@ -28,18 +29,23 @@ static void *my_seq_next(struct seq_file *s, void *v, loff_t *pos)
 	unsigned long *tmp_v = (unsigned long *) v;
 	(*tmp_v)++;
 	(*pos)++;
+	pr_info("%s my_sec_next\n", TAG);
+
 	return NULL;
 }
 
 static void my_seq_stop(struct seq_file *s, void *v)
 {
 	// Nothing to do here
+	pr_info("%s my_seq_stop\n", TAG);
 }
 
 static int my_seq_show(struct seq_file *s, void *v)
 {
 	loff_t *spot = (loff_t *) v;
 	seq_printf(s, "%Ld\n", *spot);
+	pr_info("%s my_seq_show\n", TAG);
+
 	return 0;
 }
 
@@ -52,6 +58,7 @@ static struct seq_operations my_seq_ops = {
 
 static int my_open(struct inode *inode, struct file *file)
 {
+	pr_info("%s my_open\n", TAG);
 	return seq_open(file, &my_seq_ops);
 }
 
@@ -79,17 +86,19 @@ static int __init procfs_init(void)
 	if(entry == NULL) {
 		remove_proc_entry(PROC_NAME, NULL);
 
-		pr_debug("%s Error: could not initialize /proc/%s\n", TAG, PROC_NAME);
+		pr_info("%s Error: could not initialize /proc/%s\n", TAG, PROC_NAME);
 		return -ENOMEM;
 	}
-
+	
+	pr_info("%s /proc/%s created\n", TAG, PROC_NAME);
 	return 0;
 }
 
 static void __exit procfs_exit(void)
 {
 	remove_proc_entry(PROC_NAME, NULL);
-	pr_debug("%s /proc/%s removed\n", TAG, PROC_NAME);
+	pr_info("%s /proc/%s removed\n", TAG, PROC_NAME);
+	pr_info("%s\n", TAG);
 }
 
 module_init(procfs_init);
