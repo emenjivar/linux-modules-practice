@@ -2,6 +2,8 @@
 #include <linux/module.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
+#include <linux/string.h>
+#include <linux/slab.h> // kmalloc
 #include <linux/version.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
@@ -10,6 +12,9 @@
 
 #define PROC_NAME "hello-world-seq-file"
 #define TAG "[hello-world-seq-file]"
+
+static int read_counter = 0;
+static int write_counter = 0;
 
 static void *my_seq_start(struct seq_file *s, loff_t *pos)
 {
@@ -65,8 +70,8 @@ static int my_open(struct inode *inode, struct file *file)
 static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_t *offset)
 {
 	static int finished = 0;
-	char *local_buffer = "Hello world\n";
-	size_t local_len = strlen(local_buffer);
+	static size_t buffer_len = 34;
+	char *local_buffer = kmalloc(buffer_len, GFP_KERNEL);
 
 	if (finished) {
 		finished = 0;
@@ -74,10 +79,20 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_
 	}
 
 	finished = 1;
+	
+	// Formatting string
+	snprintf(local_buffer, buffer_len, "reading %d times\nwritting %d times\n", ++read_counter, write_counter);
 
-	if(copy_to_user(buffer, local_buffer, local_len))
+	if(copy_to_user(buffer, local_buffer, 33))
 		return -EFAULT;
 
+	return buffer_len;
+}
+
+static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off)
+{
+	pr_info("%s my_write executing...", TAG);
+	write_counter++;
 	return len;
 }
 
@@ -85,6 +100,7 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_
 static const struct proc_ops my_file_ops = {
 	.proc_open = my_open,
 	.proc_read = my_read,
+	.proc_write = my_write,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release
 };
@@ -92,6 +108,7 @@ static const struct proc_ops my_file_ops = {
 static const struct file_operations my_file_ops = {
 	.open = my_open,
 	.read = my_read,
+	.write = my_write,
 	.llseek = seq_lseek,
 	.release = req_release
 };
@@ -101,7 +118,7 @@ static int __init procfs_init(void)
 {
 	struct proc_dir_entry *entry;
 
-	entry = proc_create(PROC_NAME, 0, NULL, &my_file_ops);
+	entry = proc_create(PROC_NAME, 0666, NULL, &my_file_ops);
 	if(entry == NULL) {
 		remove_proc_entry(PROC_NAME, NULL);
 
