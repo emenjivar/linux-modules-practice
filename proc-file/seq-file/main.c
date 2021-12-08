@@ -70,7 +70,7 @@ static int my_open(struct inode *inode, struct file *file)
 static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_t *offset)
 {
 	static int finished = 0;
-	static size_t buffer_len = 34;
+	static size_t buffer_len = 36;
 	char *local_buffer = kmalloc(buffer_len, GFP_KERNEL);
 
 	if (finished) {
@@ -79,11 +79,15 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_
 	}
 
 	finished = 1;
-	
-	// Formatting string
-	snprintf(local_buffer, buffer_len, "reading %d times\nwritting %d times\n", ++read_counter, write_counter);
 
-	if(copy_to_user(buffer, local_buffer, 33))
+	// Checking read_counter limit
+	if (read_counter <= 98)
+		read_counter++;
+
+	// Formatting string
+	snprintf(local_buffer, buffer_len, "reading %d times\nwritting %d times\n", read_counter, write_counter);
+
+	if(copy_to_user(buffer, local_buffer, buffer_len))
 		return -EFAULT;
 
 	return buffer_len;
@@ -92,7 +96,11 @@ static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_
 static ssize_t my_write(struct file *file, const char __user *buffer, size_t len, loff_t *off)
 {
 	pr_info("%s my_write executing...", TAG);
-	write_counter++;
+
+	// Checkint write_counter limit
+	if (write_counter <= 98)
+		write_counter++;
+	
 	return len;
 }
 
