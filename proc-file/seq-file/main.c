@@ -62,17 +62,36 @@ static int my_open(struct inode *inode, struct file *file)
 	return seq_open(file, &my_seq_ops);
 }
 
+static ssize_t my_read(struct file *file, char __user *buffer, size_t len, loff_t *offset)
+{
+	static int finished = 0;
+	char *local_buffer = "Hello world\n";
+	size_t local_len = strlen(local_buffer);
+
+	if (finished) {
+		finished = 0;
+		return 0;
+	}
+
+	finished = 1;
+
+	if(copy_to_user(buffer, local_buffer, local_len))
+		return -EFAULT;
+
+	return len;
+}
+
 #ifdef HAVE_PROC_OPS
 static const struct proc_ops my_file_ops = {
 	.proc_open = my_open,
-	.proc_read = seq_read,
+	.proc_read = my_read,
 	.proc_lseek = seq_lseek,
 	.proc_release = seq_release
 };
 #else
 static const struct file_operations my_file_ops = {
 	.open = my_open,
-	.read = seq_read,
+	.read = my_read,
 	.llseek = seq_lseek,
 	.release = req_release
 };
