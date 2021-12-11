@@ -33,6 +33,14 @@ static int __init custom_init(void)
 	int error = 0;
 	pr_info("%s module initialized\n", TAG);
 
+	/**
+	 * Creating a directory on /sys/kernel/hello-world-sysfs
+	 *
+	 * kernel_kobj creates a dir under /sys/kernel/
+	 * firmware_kobj creates a dir under /sys/firmware/
+	 * fs_kobj creates a dir under /sys/fs/
+	 * NULL creates a dir unsed /sys/
+	 */
 	module = kobject_create_and_add(NAME, kernel_kobj);
 
 	if(!module)
