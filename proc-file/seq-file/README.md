@@ -10,7 +10,7 @@ $ sudo insmod hello-world-seq-file.ko
 
 ## Usage
 After compile, you have to **write** the file using ``echo`` and **read** using ``cat``, following the next example:
-```bash
+```console
 $ echo 0 > /proc/hello-world-seq-file
 $ echo 0 > /proc/hello-world-seq-file
 $ echo 0 > /proc/hello-world-seq-file

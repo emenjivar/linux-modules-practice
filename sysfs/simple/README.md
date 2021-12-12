@@ -6,7 +6,7 @@ After compiling and mounting, the module will create the path **/sys/kernel/hell
 
 You can read and write the value of **var** using ``cat`` and ``echo`` respectively.
 Keep in mind that the **writing** must be executed from **root** user.
-```bash
+```console
 $ cat /sys/kernel/hello-world-sysfs/var
 $ 0
 $ echo 100 > /sys/kernel/hello-world-sysfs/var

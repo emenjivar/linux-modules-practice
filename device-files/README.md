@@ -4,7 +4,7 @@ This **device driver module** makes musical recommendations on the output accord
 ## Mounting the driver
 When you mount the module, you can pass the parameter ``mood`` with any of the following values: **sad**, **lonely**, **happy** and **weird**. Where **sad** is the default value when you do not pass it.
 
-```bash
+```console
 $ make
 make -C /lib/modules/5.11.0-40-generic/build M=/home/carlos/Documents/repositories/linux-modules-practice/device-files modules
 make[1]: Entering directory '/usr/src/linux-headers-5.11.0-40-generic'
@@ -25,7 +25,7 @@ After mounting the module, this will create a **device driver file** on **/dev/*
 ## Usage
 You must ``cat`` the file (or read using another command) to execute it, and every time the module will recommend you a random track according to the value of **mood** parameter.
 
-```bash
+```console
 $ sudo cat /dev/my-device-module
 Track: 13 angels standing guard round the side of your bed - Silver Mt Zion
 
@@ -37,14 +37,14 @@ Track: Pneumonia - Bjork
 ```
 
 You cannot write on **my-device-module** file, the operation is not allowed, even if you try using sudo.
-```bash
+```console
 $ sudo echo "hello" > /dev/my-device-module
 bash: /dev/my-device-module: Permission denied
 ```
 
 ## Remove from Linux
 After tested the module, you can remove using the following command:
-```bash
+```console
 $ sudo rmmod my-device-driver
 ```
 

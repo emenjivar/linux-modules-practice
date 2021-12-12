@@ -17,7 +17,7 @@ After compile, the file **hello-world-inode** will be created on **/proc** direc
 
 ## Usage
 Write to **/proc** file using ``echo`` and read using ``cat``
-```bash
+```console
 $ echo "one" > /proc/hello-world-inode
 $ echo "two" > /proc/hello-world-inode
 $ echo "three" > /proc/hello-world-inode
@@ -29,7 +29,7 @@ $ cat /proc/hello-world-inode
 
 ## Debugging
 If you want to read the generated logs for this module, try executing the following command
-```bash
+```console
 $ sudo dmesg | grep '\[hello-world-inode\]'
 [37252.540578] [hello-world-inode] /proc/hello-world-inode created
 [37535.512747] [hello-world-inode] my_write 90 bytes

@@ -9,7 +9,7 @@ apt-get install build-essential linux-headers-$(uname -r)
 ## Compile a module
 It is as simple as moving to the module folder and executing the ``make`` command
 
-```bash
+```console
 $ make
 make -C /lib/modules/5.11.0-38-generic/build M=/home/carlos/Documents/repositories/linux-modules-practice/hello-world modules
 make[1]: Entering directory '/usr/src/linux-headers-5.11.0-38-generic'
@@ -19,14 +19,14 @@ make[1]: Leaving directory '/usr/src/linux-headers-5.11.0-38-generic'
 ```
 
 This command will generate some files, the important here is **.ko**
-```bash
+```console
 $ ls
 hello_module.c  hello_module.ko  hello_module.mod  hello_module.mod.c  hello_module.mod.o  hello_module.o  Makefile  modules.order  Module.symvers
 
 ```
 
 ## Useful commands
-```bash
+```console
 # Display information about a kernel module
 # The module does not need to be mounted
 $ modinfo hello_module.ko
@@ -41,7 +41,7 @@ name:           hello_module
 vermagic:       5.11.0-38-generic SMP mod_unload modversions
 ```
 
-```bash
+```console
 # Insert a new module in the kernel (require root privileges)
 $ insmod hello_module.ko
 
@@ -49,13 +49,13 @@ $ insmod hello_module.ko
 $ dmesg | grep -e 'Hello world'
 [ 4875.502744] Hello world
 ```
-```bash
+```console
 # List modules that are already loaded in the kernel
 # Optionally, filter my loaded module
 $ lsmod | grep 'hello_module'
 ```
 
-```bash
+```console
 # Remove a module from kernel (require root privileges)
 $ rmmod hello_module
 

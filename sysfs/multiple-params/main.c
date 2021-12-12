@@ -1,3 +1,4 @@
+// https://github.com/spotify/linux/blob/master/samples/kobject/kobject-example.c
 #include <linux/kobject.h>
 #include <linux/string.h>
 #include <linux/sysfs.h>
