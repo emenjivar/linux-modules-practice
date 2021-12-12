@@ -15,7 +15,7 @@ You can set the values of those files using ``echo`` as **root** user
 
 The file **/proc/custom-screen** display the configuration on terminal.
 
-```bash
+```console
 # Display default values
 carlos:~$ cat /proc/custom-screen
 background :
