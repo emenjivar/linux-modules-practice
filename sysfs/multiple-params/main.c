@@ -5,10 +5,13 @@
 #include <linux/module.h>
 #include <linux/init.h>
 
+#define TAG "[custom-screen]"
+#define SIZE_BACKGROUND_PATH 512
+
 /**
- * Files created under /sys/kernel/multiple-params
+ * Files created under /sys/kernel/custom-screen
  */
-static char background[10];
+static char background[SIZE_BACKGROUND_PATH];
 static char *style;
 static int icon_size;
 
@@ -19,6 +22,12 @@ static ssize_t background_show(struct kobject *kobj, struct kobj_attribute *attr
 
 static ssize_t background_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
 {
+	if (count > SIZE_BACKGROUND_PATH) {
+		pr_info("%s background to long: %s\n", TAG, buf);
+		return -ENOMEM;
+	}
+
+	pr_info("%s background {size : %zu, path: %s}\n", TAG, count, buf);
 	sscanf(buf, "%s", background);
 	return count;
 }
