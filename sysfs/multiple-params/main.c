@@ -12,9 +12,10 @@
  * Files created under /sys/kernel/custom-screen
  */
 static char background[SIZE_BACKGROUND_PATH];
-static char *style;
+static char style[10] = "none"; // stretched, centered or none
 static int icon_size;
 
+// Background attr functions
 static ssize_t background_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 	return sprintf(buf, "%s\n", background);
@@ -32,13 +33,28 @@ static ssize_t background_store(struct kobject *kobj, struct kobj_attribute *att
 	return count;
 }
 
+// Style attr functions
+static ssize_t style_show(struct kobject *kobjs, struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%s\n", style);	
+}
+
+static ssize_t style_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	sscanf(buf, "%s", style);
+	return count;
+}	
+
+// attr files
 static struct kobj_attribute background_attr = __ATTR(background, 0664, background_show, background_store);
+static struct kobj_attribute style_attr = __ATTR(style, 0664, style_show, style_store);
 
 /**
  * Create a group of attributes
  */
 static struct attribute *attrs[] = {
 	&background_attr.attr,
+	&style_attr.attr,
 	NULL // Need to terminale the list of attributes
 };
 
