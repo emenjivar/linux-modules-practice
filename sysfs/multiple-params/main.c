@@ -13,7 +13,7 @@
  */
 static char background[SIZE_BACKGROUND_PATH];
 static char style[10] = "none"; // stretched, centered or none
-static int icon_size;
+static int icon_size = 48;
 
 // Background attr functions
 static ssize_t background_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
@@ -45,9 +45,22 @@ static ssize_t style_store(struct kobject *kobj, struct kobj_attribute *attr, co
 	return count;
 }	
 
+// Icon size attr functions
+static ssize_t icon_size_show(struct kobject *kobjs, struct kobj_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", icon_size);
+}
+
+static ssize_t icon_size_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
+{
+	sscanf(buf, "%d", &icon_size);
+	return count;
+}
+
 // attr files
 static struct kobj_attribute background_attr = __ATTR(background, 0664, background_show, background_store);
 static struct kobj_attribute style_attr = __ATTR(style, 0664, style_show, style_store);
+static struct kobj_attribute icon_size_attr = __ATTR(icon_size, 0664, icon_size_show, icon_size_store);
 
 /**
  * Create a group of attributes
@@ -55,6 +68,7 @@ static struct kobj_attribute style_attr = __ATTR(style, 0664, style_show, style_
 static struct attribute *attrs[] = {
 	&background_attr.attr,
 	&style_attr.attr,
+	&icon_size_attr.attr,
 	NULL // Need to terminale the list of attributes
 };
 
