@@ -23,9 +23,9 @@ style : none
 icon_size : 48
 
 # Setting new values
-root:~# echo "/home/carlos/Pictures/wallpapers/my_image.png" > /sys/kernel/custom-screen/background
-root:~# echo "centered" > /sys/kernel/custom-screen/style
-root:~# echo 30 > /sys/kernel/custom-screen/icon_size
+root:~# echo "/home/carlos/Pictures/wallpapers/my_image.png" > /sys/kernel/custom_screen/background
+root:~# echo "centered" > /sys/kernel/custom_screen/style
+root:~# echo 30 > /sys/kernel/custom_screen/icon_size
 
 # Display new values
 carlos:~$ cat /proc/custom-screen
