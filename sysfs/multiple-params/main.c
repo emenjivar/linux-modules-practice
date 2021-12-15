@@ -37,10 +37,10 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t length, 
 {
 	static int finished = 0;
 	
-	long unsigned int local_length = 5 + SIZE_BACKGROUND_PATH;
+	long unsigned int local_length = strlen("background") + SIZE_BACKGROUND_PATH + strlen("style") + strlen("stretched") + strlen("icon_size") + 3;
 	char *local_buffer = kmalloc(local_length, GFP_KERNEL);
 
-	snprintf(local_buffer, local_length, "background: %s\n", background);
+	snprintf(local_buffer, local_length, "background: %s\nstyle: %s\nicon_size: %d\n", background, style, icon_size);
 
 	if (finished) {
 		finished = 0;
